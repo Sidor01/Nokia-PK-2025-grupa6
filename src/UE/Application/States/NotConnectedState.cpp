@@ -22,5 +22,8 @@ void NotConnectedState::handleSib(common::BtsId btsId)
 }
 void NotConnectedState::handleSms(common::PhoneNumber from, std::string text)
 {
+    logger.logInfo("Received SMS from: ", from, ", text: ", text);
+    context.user.showNewSms();
+    context.user.showNotConnected();
 }
 }

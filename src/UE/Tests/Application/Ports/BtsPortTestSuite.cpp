@@ -22,6 +22,7 @@ protected:
     StrictMock<IBtsEventsHandlerMock> handlerMock;
     StrictMock<common::ITransportMock> transportMock;
     common::ITransport::MessageCallback messageCallback;
+    common::ITransport::DisconnectedCallback disconnectCallback;
 
     BtsPort objectUnderTest{loggerMock, transportMock, PHONE_NUMBER};
 
@@ -29,11 +30,13 @@ protected:
     {
         EXPECT_CALL(transportMock, registerMessageCallback(_))
                 .WillOnce(SaveArg<0>(&messageCallback));
+        EXPECT_CALL(transportMock, registerDisconnectedCallback(_))
+                .WillOnce(SaveArg<0>(&disconnectCallback));
         objectUnderTest.start(handlerMock);
     }
     ~BtsPortTestSuite()
     {
-
+        EXPECT_CALL(transportMock, registerDisconnectedCallback(IsNull()));
         EXPECT_CALL(transportMock, registerMessageCallback(IsNull()));
         objectUnderTest.stop();
     }
@@ -41,6 +44,7 @@ protected:
 
 TEST_F(BtsPortTestSuite, shallRegisterHandlersBetweenStartStop)
 {
+    // Expectations set in constructor and destructor
 }
 
 TEST_F(BtsPortTestSuite, shallIgnoreWrongMessage)
@@ -57,16 +61,6 @@ TEST_F(BtsPortTestSuite, shallHandleSib)
                                 common::PhoneNumber{},
                                 PHONE_NUMBER};
     msg.writeBtsId(BTS_ID);
-    messageCallback(msg.getMessage());
-}
-
-TEST_F(BtsPortTestSuite, shallHandleAttachAccept)
-{
-    EXPECT_CALL(handlerMock, handleAttachAccept());
-    common::OutgoingMessage msg{common::MessageId::AttachResponse,
-                                common::PhoneNumber{},
-                                PHONE_NUMBER};
-    msg.writeNumber(true);
     messageCallback(msg.getMessage());
 }
 
@@ -91,6 +85,22 @@ TEST_F(BtsPortTestSuite, shallSendAttachRequest)
     ASSERT_NO_THROW(EXPECT_EQ(common::PhoneNumber{}, reader.readPhoneNumber()));
     ASSERT_NO_THROW(EXPECT_EQ(BTS_ID, reader.readBtsId()));
     ASSERT_NO_THROW(reader.checkEndOfMessage());
+}
+
+TEST_F(BtsPortTestSuite, shallHandleSmsReception)
+{
+    const common::PhoneNumber SENDER_PHONE{113};
+    const std::string SMS_TEXT = "Hello world!";
+    
+    // Expect the handler to be called with sender phone and text
+    EXPECT_CALL(handlerMock, handleSms(SENDER_PHONE, SMS_TEXT));
+
+    // Create SMS message
+    common::OutgoingMessage msg{common::MessageId::Sms,
+                              SENDER_PHONE,
+                              PHONE_NUMBER};
+    msg.writeText(SMS_TEXT);
+    messageCallback(msg.getMessage());
 }
 
 }

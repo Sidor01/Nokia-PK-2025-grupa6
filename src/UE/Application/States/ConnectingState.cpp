@@ -11,7 +11,7 @@ ConnectingState::ConnectingState(Context &context)
     context.user.showConnecting();
 }
 
-void ConnectingState::handleAttachAccept(){
+void ConnectingState::handleAttachAccept() {
     context.timer.stopTimer();
     context.setState<ConnectedState>();
 }
@@ -21,14 +21,19 @@ void ConnectingState::handleAttachReject(){
     context.setState<NotConnectedState>();
 }
 
-void ConnectingState::handleTimeout(){
+void ConnectingState::handleTimeout() {
     context.setState<NotConnectedState>();
 }
 
 void ConnectingState::handleDisconnect() {
+    context.timer.stopTimer();
     context.setState<NotConnectedState>();
 }
+
 void ConnectingState::handleSms(common::PhoneNumber from, std::string text)
 {
+    logger.logInfo("Received SMS from: ", from, ", text: ", text);
+    context.user.showNewSms();
 }
+
 }

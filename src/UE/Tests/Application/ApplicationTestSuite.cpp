@@ -48,6 +48,18 @@ TEST_F(ApplicationNotConnectedTestSuite, shallHandleSibMessage)
     shallHandleSibMessage();
 }
 
+TEST_F(ApplicationNotConnectedTestSuite, shallHandleSmsInNotConnectedState)
+{
+    const common::PhoneNumber SENDER_NUMBER{123};
+    const std::string MESSAGE = "Test SMS";
+
+    // In not connected state, should show connecting and store SMS
+    EXPECT_CALL(userPortMock, showNotConnected());
+    EXPECT_CALL(userPortMock, showNewSms());
+
+    objectUnderTest.handleSms(SENDER_NUMBER, MESSAGE);
+}
+
 struct ApplicationConnectingTestSuite : ApplicationNotConnectedTestSuite
 {
     ApplicationConnectingTestSuite()
@@ -58,7 +70,35 @@ struct ApplicationConnectingTestSuite : ApplicationNotConnectedTestSuite
 
 TEST_F(ApplicationConnectingTestSuite, shallHandleAttachAccept)
 {
+    InSequence seq;  // Enforce strict order of expectations
+    EXPECT_CALL(timerPortMock, stopTimer());
     EXPECT_CALL(userPortMock, showConnected());
     objectUnderTest.handleAttachAccept();
 }
+
+TEST_F(ApplicationConnectingTestSuite, shallHandleAttachReject)
+{
+    InSequence seq;
+    EXPECT_CALL(timerPortMock, stopTimer());
+    EXPECT_CALL(userPortMock, showNotConnected());
+    objectUnderTest.handleAttachReject();
+}
+
+TEST_F(ApplicationConnectingTestSuite, shallHandleTimeout)
+{
+    EXPECT_CALL(userPortMock, showNotConnected());
+    objectUnderTest.handleTimeout();
+}
+
+struct ApplicationConnectedTestSuite : ApplicationConnectingTestSuite
+{
+    ApplicationConnectedTestSuite()
+    {
+        InSequence seq;
+        EXPECT_CALL(timerPortMock, stopTimer());
+        EXPECT_CALL(userPortMock, showConnected());
+        objectUnderTest.handleAttachAccept();
+    }
+};
+
 }
