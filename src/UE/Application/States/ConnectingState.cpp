@@ -26,32 +26,9 @@ void ConnectingState::handleTimeout(){
 }
 
 void ConnectingState::handleDisconnect() {
-    logger.logInfo("Connection to BTS dropped while connecting");
-    context.timer.stopTimer(); 
     context.setState<NotConnectedState>();
 }
-
 void ConnectingState::handleSms(common::PhoneNumber from, std::string text)
 {
-}
-
-void ConnectingState::handleSib(common::BtsId btsId)
-{
-    logger.logInfo("Received SIB message while connecting, btsId: ", btsId);
-    
-    
-    context.currentBtsId = btsId;
-    
-    
-    logger.logInfo("Stored SIB data, remaining in Connecting state (not restarting procedure)");
-}
-
-void ConnectingState::handleClose()
-{
-    logger.logInfo("User closed UE while connecting to BTS");
-    
-    context.timer.stopTimer();
-    
-    
 }
 }

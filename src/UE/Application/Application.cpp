@@ -142,10 +142,4 @@ void Application::rejectSmsCompose()
     context.state->rejectSmsCompose();
 }
 
-void Application::handleClose()
-{
-    logger.logInfo("Application close requested");
-    context.state->handleClose();
-}
-
 }

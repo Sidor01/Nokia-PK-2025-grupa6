@@ -6,10 +6,6 @@
 namespace ue
 {
 
-
-class SmsViewState;
-class SmsComposeState;
-
 class ConnectedState : public BaseState
 {
 public:
@@ -22,17 +18,17 @@ public:
     void acceptCallRequest() override;
     void rejectCallRequest() override;
     void viewSms() override;
-    void composeSms() override;
-    
-    
     void selectSms(size_t index) override;
     void closeSmsView() override;
+    void composeSms() override;
     void acceptSmsCompose(common::PhoneNumber number, const std::string& text) override;
     void rejectSmsCompose() override;
+    
 
     void dial() override;
     
 private:
+
     void updateNotificationIcon(const std::string& context);
     
     common::PhoneNumber callingPhoneNumber;

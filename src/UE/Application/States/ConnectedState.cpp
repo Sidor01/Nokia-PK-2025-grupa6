@@ -2,8 +2,6 @@
 #include "NotConnectedState.hpp"
 #include "TalkingState.hpp"
 #include "DialState.hpp"
-#include "SmsViewState.hpp"
-#include "SmsComposeState.hpp"
 #include "../Ports/ISmsListViewPort.hpp"
 #include "../Ports/UserPort.hpp"
 #include "UeGui/ICallMode.hpp"
@@ -98,51 +96,99 @@ void ConnectedState::dial()
 
 void ConnectedState::viewSms()
 {
-    logger.logInfo("User requested to view SMS list - transitioning to SmsViewState");
+    logger.logInfo("User requested to view SMS list");
     
+    updateNotificationIcon("viewSms");
+
+    auto* smsListViewPort = dynamic_cast<ISmsListViewPort*>(&context.user);
+    if (smsListViewPort) {
+
+        smsListViewPort->setSmsList(context.smsDb.getAllSms());
+        
+
+        smsListViewPort->setSelectSmsCallback([this](size_t index) {
+            this->selectSms(index);
+        });
+    } else {
+        logger.logError("Failed to cast UserPort to ISmsListViewPort");
+    }
     
-    context.setState<SmsViewState>();
+
+    context.user.showSmsList();
 }
 
 void ConnectedState::selectSms(size_t index)
 {
-    logger.logError("Unexpected: selectSms in ConnectedState with index: ", index);
-    viewSms();
+    logger.logInfo("User selected SMS at index: ", index);
+    
+
+    const auto& smsList = context.smsDb.getAllSms();
+    
+
+    if (index < smsList.size())
+    {
+
+        const auto& sms = smsList[index];
+        
+        if (sms.isSent) {
+            context.user.showSentSmsContent(to_string(sms.to), sms.text);
+        } else {
+            context.user.showSmsContent(to_string(sms.from), sms.text);
+        }
+        
+        if (!sms.isRead)
+        {
+            context.smsDb.markAsRead(index);
+            
+            updateNotificationIcon("selectSms");
+        }
+    }
+    else
+    {
+        logger.logError("Invalid SMS index: ", index);
+        viewSms();
+    }
 }
 
 void ConnectedState::closeSmsView()
 {
-    logger.logError("Unexpected: closeSmsView in ConnectedState");
-
+    logger.logInfo("User closed SMS view");
+    
     context.user.showConnected();
+    
+    updateNotificationIcon("closeSmsView");
 }
 
 void ConnectedState::composeSms()
 {
-    logger.logInfo("User requested to compose an SMS - transitioning to SmsComposeState");
+    logger.logInfo("User requested to compose an SMS");
     
- 
-    context.setState<SmsComposeState>();
+
+    context.user.showSmsComposeView();
 }
 
 void ConnectedState::acceptSmsCompose(common::PhoneNumber number, const std::string& text)
 {
-    logger.logError("Unexpected: acceptSmsCompose in ConnectedState");
+    logger.logInfo("User accepted SMS composition to: ", number, ", text: ", text);
     
-    
+
     context.bts.sendSms(number, text);
+    
+
     context.smsDb.addSentSms(context.phoneNumber, number, text);
+    
     context.user.showConnected();
-    updateNotificationIcon("acceptSmsCompose unexpected");
+    
+    updateNotificationIcon("acceptSmsCompose");
 }
 
 void ConnectedState::rejectSmsCompose()
 {
-    logger.logError("Unexpected: rejectSmsCompose in ConnectedState");
+    logger.logInfo("User rejected SMS composition");
     
-   
     context.user.showConnected();
-    updateNotificationIcon("rejectSmsCompose unexpected");
+
+    updateNotificationIcon("rejectSmsCompose");
 }
 
 void ConnectedState::updateNotificationIcon(const std::string& source)
