@@ -17,6 +17,7 @@ struct Context
     common::PhoneNumber phoneNumber;
     SmsDb smsDb;
     std::unique_ptr<IEventsHandler> state{};
+    common::BtsId currentBtsId{};  
 
     Context(common::ILogger& logger, IBtsPort& bts, IUserPort& user, 
             ITimerPort& timer, common::PhoneNumber number, SmsDb initialSmsDb = {})

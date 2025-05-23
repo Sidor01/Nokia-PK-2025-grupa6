@@ -14,6 +14,9 @@ public:
     void handleTimeout() override;
     void handleDisconnect() override;
     void handleSms(common::PhoneNumber from, std::string text) override;
+    void handleSib(common::BtsId btsId) override;
+    
+    void handleClose();
 };
 
 }

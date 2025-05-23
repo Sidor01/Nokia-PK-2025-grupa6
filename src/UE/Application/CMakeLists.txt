@@ -16,6 +16,8 @@ add_library(${PROJECT_NAME} ${SRC_LIST}
     States/NotConnectedState.cpp States/NotConnectedState.hpp 
     States/TalkingState.cpp States/TalkingState.hpp
     States/DialState.cpp States/DialState.hpp
+    States/SmsViewState.cpp States/SmsViewState.hpp
+    States/SmsComposeState.cpp States/SmsComposeState.hpp
     SmsDb.cpp SmsDb.hpp
     Application.cpp Application.hpp CMakeLists.txt Context.hpp IEventsHandler.hpp)
 target_link_libraries(${PROJECT_NAME} Common)

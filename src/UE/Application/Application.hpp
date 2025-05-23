@@ -50,6 +50,8 @@ public:
     
     const SmsDb& getSmsDb() const { return context.smsDb; }
     
+    void handleClose();
+    
 private:
     Context context;
     common::PrefixedLogger logger;
