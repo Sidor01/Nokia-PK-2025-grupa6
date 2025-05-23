@@ -22,6 +22,13 @@ int main(int argc, char* argv[])
     bts.start(app);
     user.start(app);
     timer.start(app);
+    
+    
+    gui.setCloseGuard([&app]() {
+        app.handleClose();
+        return true; 
+    });
+    
     appEnv->startMessageLoop();
     bts.stop();
     user.stop();

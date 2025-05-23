@@ -39,6 +39,9 @@ public:
     void composeSms() override;
     void acceptSmsCompose(common::PhoneNumber number, const std::string& text) override;
     void rejectSmsCompose() override;
+    
+    
+    virtual void handleClose();
 
 protected:
     Context& context;

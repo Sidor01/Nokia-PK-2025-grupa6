@@ -119,4 +119,9 @@ void BaseState::rejectSmsCompose()
     logger.logError("Unexpected: rejectSmsCompose");
 }
 
+void BaseState::handleClose()
+{
+    logger.logInfo("Application close requested in state");
+}
+
 }
