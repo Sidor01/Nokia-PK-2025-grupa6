@@ -23,8 +23,6 @@ jobs:
         version: '5.15.2'
         target: 'desktop'
         arch: 'gcc_64'
-        modules: 'qtbase qttools'
-        setup-python: 'false'
         
     - name: cmake
       run: cmake .
