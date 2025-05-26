@@ -6,8 +6,8 @@
 namespace ue
 {
 
-const std::chrono::seconds DialState::CALL_REQUEST_TIMEOUT{60};
-const std::chrono::seconds DialState::CALL_RESPONSE_TIMEOUT{30};
+const std::chrono::seconds DialState::CALL_REQUEST_TIMEOUT{62};
+const std::chrono::seconds DialState::CALL_RESPONSE_TIMEOUT{60};
 
 DialState::DialState(Context &context)
     : BaseState(context, "DialState")
@@ -59,10 +59,13 @@ void DialState::handleCallRequest(common::PhoneNumber from)
 
 void DialState::acceptDialing(common::PhoneNumber recipientNumber)
 {
-    if (receivingCallRequest) {
-        logger.logInfo("Ignoring outgoing call request to: ", recipientNumber, " because we're already receiving a call from: ", callingPhoneNumber);
-        return;
-    }
+    // WARNING! commented lines in this method because they
+    // break cancelling Dial (making it impossible to cancel call request)
+
+    //if (receivingCallRequest) {
+    //    logger.logInfo("Ignoring outgoing call request to: ", recipientNumber, " because we're already receiving a call from: ", callingPhoneNumber);
+    //    return;
+    //}
     
     logger.logInfo("Sending call request to: ", recipientNumber);
     
@@ -74,7 +77,7 @@ void DialState::acceptDialing(common::PhoneNumber recipientNumber)
     
     context.bts.sendCallRequest(recipientPhoneNumber);
 
-    context.user.showCallView(recipientPhoneNumber);
+    //context.user.showCallView(recipientPhoneNumber);
     
     callRequestSent = true;
     
