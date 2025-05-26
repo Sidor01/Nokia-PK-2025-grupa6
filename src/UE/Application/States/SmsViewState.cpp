@@ -11,7 +11,7 @@
 namespace ue
 {
 
-const std::chrono::seconds SmsViewState::CALL_TIMEOUT{30};
+const std::chrono::seconds SmsViewState::CALL_TIMEOUT{60};
 
 SmsViewState::SmsViewState(Context &context)
     : BaseState(context, "SmsViewState")
