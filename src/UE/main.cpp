@@ -4,6 +4,8 @@
 #include "Ports/UserPort.hpp"
 #include "Ports/TimerPort.hpp"
 #include "SmsDb.hpp"
+#include <chrono>
+#include <QTimer>
 
 int main(int argc, char* argv[])
 {
@@ -25,6 +27,12 @@ int main(int argc, char* argv[])
     user.start(app);
     timer.start(app);
     
+    QTimer *qtTimer = new QTimer();
+    qtTimer->setInterval(1000); 
+    QObject::connect(qtTimer, &QTimer::timeout, [&timer]() {
+        timer.processTimeoutNow();
+    });
+    qtTimer->start();
     
     gui.setCloseGuard([&app]() {
         app.handleClose();
@@ -35,5 +43,7 @@ int main(int argc, char* argv[])
     bts.stop();
     user.stop();
     timer.stop();
+    
+    delete qtTimer;
 }
 

@@ -8,7 +8,7 @@
 namespace ue
 {
 
-const std::chrono::seconds SmsComposeState::CALL_TIMEOUT{30};
+const std::chrono::seconds SmsComposeState::CALL_TIMEOUT{60};
 
 SmsComposeState::SmsComposeState(Context &context)
     : BaseState(context, "SmsComposeState")
