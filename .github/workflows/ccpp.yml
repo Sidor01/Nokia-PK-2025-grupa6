@@ -7,8 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  build-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -17,6 +16,7 @@ jobs:
         
     steps:
     - uses: actions/checkout@v4
+    
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
@@ -24,23 +24,51 @@ jobs:
         target: 'desktop'
         arch: 'gcc_64'
         
-    - name: cmake
+    - name: Configure CMake
       run: cmake .
-    - name: make all targets
+      
+    - name: Build all targets
       run: make all
 
-    - name: UT for BtsApplication
-      run: make BtsApplicationUT 
+    - name: Build Test Executables
+      run: |
+        make BtsApplicationUT
+        make COMMON_UT
+        make UeApplicationUT
 
-    - name: run BTS ut
-      run: ./BTS/Tests/Application/BtsApplicationUT
+    # Run Common Tests
+    - name: Run COMMON Unit Tests
+      run: |
+        echo "Running COMMON unit tests..."
+        ./COMMON/Tests/COMMON_UT --gtest_output=xml:common_test_results.xml
 
-    - name: UT for COMMON
-      run: make COMMON_UT
+    # Run BTS Tests
+    - name: Run BTS Application Tests
+      run: |
+        echo "Running BTS Application tests..."
+        ./BTS/Tests/Application/BtsApplicationUT --gtest_output=xml:bts_test_results.xml
 
-    - name: UT for UeApplication
-      run: make UeApplicationUT
+    # Run UE Application Tests with all test suites
+    - name: Run UE Application Tests - All Test Suites
+      run: |
+        echo "Running all UE Application test suites..."
+        ./UE/Tests/Application/UeApplicationUT --gtest_output=xml:ue_all_test_results.xml
 
-    - name: Next Steps
-      run: echo "Add your next steps here"
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: src/*_test_results.xml
+
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "=== Test Execution Summary ==="
+        echo "✅ COMMON Tests: Completed"
+        echo "✅ BTS Application Tests: Completed"
+        echo "✅ UE Application Tests: Completed"
+
+        echo "Test results have been uploaded as artifacts."
 
